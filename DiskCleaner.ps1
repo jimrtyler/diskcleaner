@@ -13,7 +13,7 @@ Add-Type -Name Window -Namespace Console -MemberDefinition ' [DllImport("Kernel3
 #Check the C Drive - this is the default drive to be checked. Users can change it in the dropdown combobox
 $c = Get-Volume -DriveLetter C
 
-function Check-Browsers() {
+function Select-BrowserProcesses() {
     $runningCount = 0
     if(Get-Process | ? {$_.ProcessName -like "*Edge*"}) { $runningCount++ }
     if(Get-Process | ? {$_.ProcessName -like "*Chrome*"}) { $runningCount++ }
@@ -428,7 +428,7 @@ $CleanDiskBtn.Add_Click({
     #Show-Console
     $LogFileLabel.text = "Cleaning drive..."
 
-    $BrowserCheck = Check-Browsers
+    $BrowserCheck = Select-BrowserProcesses
 
     if($BrowserCheck -eq $false) {
         Write-Host "Browsers are not running... proceeding with disk cleanup..."
