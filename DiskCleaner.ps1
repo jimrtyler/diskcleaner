@@ -15,11 +15,11 @@ $c = Get-Volume -DriveLetter C
 
 function Select-BrowserProcesses() {
     $runningCount = 0
-    if(Get-Process | ? {$_.ProcessName -like "*Edge*"}) { $runningCount++ }
-    if(Get-Process | ? {$_.ProcessName -like "*Chrome*"}) { $runningCount++ }
-    if(Get-Process | ? {$_.ProcessName -like "*Firefox*"}) { $runningCount++ }
-    if(Get-Process | ? {$_.ProcessName -like "*Opera*"}) { $runningCount++ }
-    if(Get-Process | ? {$_.ProcessName -like "*Iexplore*"}) { $runningCount++ }
+    if(Get-Process | Where-Object {$_.ProcessName -like "*Edge*"}) { $runningCount++ }
+    if(Get-Process | Where-Object {$_.ProcessName -like "*Chrome*"}) { $runningCount++ }
+    if(Get-Process | Where-Object {$_.ProcessName -like "*Firefox*"}) { $runningCount++ }
+    if(Get-Process | Where-Object {$_.ProcessName -like "*Opera*"}) { $runningCount++ }
+    if(Get-Process | Where-Object {$_.ProcessName -like "*Iexplore*"}) { $runningCount++ }
     if($runningCount -gt 0) {
         return $true
     } else {
@@ -56,7 +56,7 @@ function Hide-Console {
 } 
 
 #Function to Calculate Drive Size and Junk
-function Assess-Drives() {
+function Get-DriveSizeInfo() {
     param(
         $DriveLetter
     )
@@ -148,7 +148,7 @@ function Assess-Drives() {
 }#End Assess-Drives function Declaration
 
 
-function Slim-Drive() {
+function Clear-DriveJunk() {
     param(
         $DriveLetter
     )
@@ -232,7 +232,7 @@ function Slim-Drive() {
                 $junkFound += $dir.Sum
 
                 #Actually delete the contents of the folder
-                Get-ChildItem -Path $path -Include *.* -File -Recurse | foreach { Remove-Item -Path $_ -Force }
+                Get-ChildItem -Path $path -Include *.* -File -Recurse | ForEach-Object { Remove-Item -Path $_ -Force }
 
             } else {
                 $timestamp = Get-Date
@@ -309,7 +309,7 @@ $DriveComboBox.dropdownstyle     = "DropDownList"
 #Populate the ComboBox with Only Existing Drives
 $drives = Get-Volume
 foreach($drive in $drives) {
-    if($drive.DriveLetter -ne $null) {
+    if($null -ne $drive.DriveLetter) {
         $DriveComboBox.Items.Add($drive.DriveLetter)
     }
     if($drive.DriveLetter -eq "C") {
@@ -419,7 +419,7 @@ $DiskSlimmerForm.controls.AddRange(@($SelectDiskLabel,$DriveComboBox,$FreeSpaceL
 $NewDriveLetter = $DriveComboBox.Text  
 $LogFileLabel.text = "Analyzing drives..."
 Hide-Console 
-Assess-Drives -DriveLetter $NewDriveLetter
+Get-DriveSizeInfo -DriveLetter $NewDriveLetter
 $LogFileLabel.text = "Log File Located: $logfile"
 
 
@@ -433,9 +433,11 @@ $CleanDiskBtn.Add_Click({
     if($BrowserCheck -eq $false) {
         Write-Host "Browsers are not running... proceeding with disk cleanup..."
         $NewDriveLetter = $DriveComboBox.Text  
-        Slim-Drive -DriveLetter $NewDriveLetter
+        Clear-DriveJunk -DriveLetter $NewDriveLetter
         #Hide-Console 
         $LogFileLabel.text = "Log File Located: $logfile"
+        #Re-check the junk size after the fact
+        Get-DriveSizeInfo -DriveLetter $NewDriveLetter
 
     } else {
         Write-Host "Browsers are running... notifying user..."
