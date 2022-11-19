@@ -5,7 +5,19 @@
 #>
 
 #Define Log File Location
-$logfile = "C:\temp\diskslimmer.log"
+$logfile = "C:\temp\diskcleaner.log"
+
+#==========Localization Variables==========
+#GUI Variables
+$FormTitleText = "Disk Cleaner by Jim Tyler (PowerShellEngineer.com)"
+$SelectDiskLabelText = "Select Disk:"
+$FreeSpaceLabelText = "Free Space (GB): "
+$TotalSpaceLabelText = "Total Space (GB): "
+$JunkFoundLabelText = "Junk Found (GB):"
+$CleanDiskBtnText = "Clean Disk *Warning - Deletes Files*"
+$SpaceCleanedLabelText = "Space Cleaned (GB): "
+$LogFileLabelText = "Log File Located: $logfile"
+$CreditLabelText = "Script by Jim Tyler - PowerShellEngineer.com"
 
 # .Net methods for hiding/showing the console in the background 
 Add-Type -Name Window -Namespace Console -MemberDefinition ' [DllImport("Kernel32.dll")] public static extern IntPtr GetConsoleWindow(); [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, Int32 nCmdShow); ' 
@@ -47,6 +59,11 @@ $consolePtr = [Console.Window]::GetConsoleWindow()
 [Console.Window]::ShowWindow($consolePtr, 4) 
 }
 
+<# 
+.NAME
+    DiskCleaner by Jim Tyler, PowerShellEngineer.com
+    Twitter: @PowerShellEng
+#>
 
 #Function to Hide the PowerShell Console Behind the Windows Forms GUI
 function Hide-Console { 
@@ -278,6 +295,11 @@ function Clear-DriveJunk() {
 
 }
 
+<# 
+.NAME
+    DiskCleaner by Jim Tyler, PowerShellEngineer.com
+    Twitter: @PowerShellEng
+#>
 
 #Build Windows Forms UI Elements
 
@@ -286,13 +308,13 @@ Add-Type -AssemblyName System.Windows.Forms
 
 $DiskSlimmerForm                 = New-Object system.Windows.Forms.Form
 $DiskSlimmerForm.ClientSize      = New-Object System.Drawing.Point(447,335)
-$DiskSlimmerForm.text            = "Disk Cleaner by Jim Tyler (PowerShellEngineer.com)"
+$DiskSlimmerForm.text            = $FormTitleText
 $DiskSlimmerForm.TopMost         = $false
 #$Icon = New-Object system.drawing.icon("http://www.powershellengineer.com/images/posh.png")
 #$DiskSlimmerForm.icon            = $Icon
 
 $SelectDiskLabel                 = New-Object system.Windows.Forms.Label
-$SelectDiskLabel.text            = "Select Disk:"
+$SelectDiskLabel.text            = $SelectDiskLabelText
 $SelectDiskLabel.AutoSize        = $true
 $SelectDiskLabel.width           = 25
 $SelectDiskLabel.height          = 10
@@ -319,7 +341,7 @@ foreach($drive in $drives) {
 
 
 $FreeSpaceLabel                  = New-Object system.Windows.Forms.Label
-$FreeSpaceLabel.text             = "Free Space (GB): "
+$FreeSpaceLabel.text             = $FreeSpaceLabelText
 $FreeSpaceLabel.AutoSize         = $true
 $FreeSpaceLabel.width            = 25
 $FreeSpaceLabel.height           = 10
@@ -328,7 +350,7 @@ $FreeSpaceLabel.Font             = New-Object System.Drawing.Font('Microsoft San
 $FreeSpaceLabel.ForeColor        = [System.Drawing.ColorTranslator]::FromHtml("#417505")
 
 $TotalSpaceLabel                 = New-Object system.Windows.Forms.Label
-$TotalSpaceLabel.text            = "Total Space (GB): "
+$TotalSpaceLabel.text            = $TotalSpaceLabelText
 $TotalSpaceLabel.AutoSize        = $true
 $TotalSpaceLabel.width           = 25
 $TotalSpaceLabel.height          = 10
@@ -353,7 +375,7 @@ $TotalSpaceValue.location        = New-Object System.Drawing.Point(271,91)
 $TotalSpaceValue.Font            = New-Object System.Drawing.Font('Microsoft Sans Serif',14,[System.Drawing.FontStyle]([System.Drawing.FontStyle]::Bold))
 
 $JunkFoundLabel                  = New-Object system.Windows.Forms.Label
-$JunkFoundLabel.text             = "Junk Found (GB):"
+$JunkFoundLabel.text             = $JunkFoundLabelText
 $JunkFoundLabel.AutoSize         = $true
 $JunkFoundLabel.width            = 25
 $JunkFoundLabel.height           = 10
@@ -371,14 +393,14 @@ $JunkFoundValue.Font             = New-Object System.Drawing.Font('Microsoft San
 $JunkFoundValue.ForeColor        = [System.Drawing.ColorTranslator]::FromHtml("#d0021b")
 
 $CleanDiskBtn                    = New-Object system.Windows.Forms.Button
-$CleanDiskBtn.text               = "Clean Disk *Warning - Deletes Files*"
+$CleanDiskBtn.text               = $CleanDiskBtnText 
 $CleanDiskBtn.width              = 402
 $CleanDiskBtn.height             = 39
 $CleanDiskBtn.location           = New-Object System.Drawing.Point(20,162)
 $CleanDiskBtn.Font               = New-Object System.Drawing.Font('Microsoft Sans Serif',14)
 
 $Label2                          = New-Object system.Windows.Forms.Label
-$Label2.text                     = "Space Cleaned (GB): "
+$Label2.text                     = $SpaceCleanedLabelText
 $Label2.AutoSize                 = $true
 $Label2.width                    = 25
 $Label2.height                   = 10
@@ -396,7 +418,7 @@ $SpaceCleanedValue.Font          = New-Object System.Drawing.Font('Microsoft San
 $SpaceCleanedValue.ForeColor     = [System.Drawing.ColorTranslator]::FromHtml("#417505")
 
 $LogFileLabel                    = New-Object system.Windows.Forms.Label
-$LogFileLabel.text               = "Log File Located: $logfile"
+$LogFileLabel.text               = $LogFileLabelText
 $LogFileLabel.AutoSize           = $true
 $LogFileLabel.width              = 25
 $LogFileLabel.height             = 10
@@ -405,7 +427,7 @@ $LogFileLabel.Font               = New-Object System.Drawing.Font('Microsoft San
 $LogFileLabel.ForeColor          = [System.Drawing.ColorTranslator]::FromHtml("#000000")
 
 $Label1                          = New-Object system.Windows.Forms.Label
-$Label1.text                     = "Script by Jim Tyler - PowerShellEngineer.com"
+$Label1.text                     = $CreditLabelText
 $Label1.AutoSize                 = $true
 $Label1.width                    = 25
 $Label1.height                   = 10
@@ -453,7 +475,11 @@ $DriveComboBox.Add_SelectedIndexChanged({
 })
 
 #region Logic 
-
+<# 
+.NAME
+    DiskCleaner by Jim Tyler, PowerShellEngineer.com
+    Twitter: @PowerShellEng
+#>
 #endregion
 
 [void]$DiskSlimmerForm.ShowDialog()
