@@ -73,9 +73,13 @@ function Hide-Console {
 } 
 
 #Function to Calculate Drive Size and Junk
-function Get-DriveSizeInfo() {
+function Get-DriveJunk() {
+    [CmdletBinding()] #turns function into advanced function
     param(
-        $DriveLetter
+        [parameter(position=0,mandatory=$true)]
+        $DriveLetter,
+        [parameter(position=1,mandatory=$false)]
+        $LogFile
     )
 
     #Building the drive string; the environment has an issue when you try to echo a string with the value of 
@@ -166,8 +170,22 @@ function Get-DriveSizeInfo() {
 
 
 function Clear-DriveJunk() {
+    [CmdletBinding()] #turns function into advanced function
     param(
-        $DriveLetter
+        [parameter(position=0,mandatory=$true)]
+        $DriveLetter,
+        [parameter(position=1,mandatory=$true)]
+        $LogFile,
+        [parameter(position=2,mandatory=$false)]
+        $OlderThan,
+        [parameter(position=3,mandatory=$false)]
+        $Defrag,
+        [parameter(position=4,mandatory=$false)]
+        $EmptyRecycleBin,
+        [parameter(position=5,mandatory=$false)]
+        $IgnoreBrowsers,
+        [parameter(position=6,mandatory=$false)]
+        $CloseBrowsers
     )
     #Write log that slimming has started...
     $timestamp = Get-Date
@@ -399,14 +417,14 @@ $CleanDiskBtn.height             = 39
 $CleanDiskBtn.location           = New-Object System.Drawing.Point(20,162)
 $CleanDiskBtn.Font               = New-Object System.Drawing.Font('Microsoft Sans Serif',14)
 
-$Label2                          = New-Object system.Windows.Forms.Label
-$Label2.text                     = $SpaceCleanedLabelText
-$Label2.AutoSize                 = $true
-$Label2.width                    = 25
-$Label2.height                   = 10
-$Label2.location                 = New-Object System.Drawing.Point(20,218)
-$Label2.Font                     = New-Object System.Drawing.Font('Microsoft Sans Serif',14)
-$Label2.ForeColor                = [System.Drawing.ColorTranslator]::FromHtml("#417505")
+$SpaceCleanedLabel                          = New-Object system.Windows.Forms.Label
+$SpaceCleanedLabel.text                     = $SpaceCleanedLabelText
+$SpaceCleanedLabel.AutoSize                 = $true
+$SpaceCleanedLabel.width                    = 25
+$SpaceCleanedLabel.height                   = 10
+$SpaceCleanedLabel.location                 = New-Object System.Drawing.Point(20,218)
+$SpaceCleanedLabel.Font                     = New-Object System.Drawing.Font('Microsoft Sans Serif',14)
+$SpaceCleanedLabel.ForeColor                = [System.Drawing.ColorTranslator]::FromHtml("#417505")
 
 $SpaceCleanedValue               = New-Object system.Windows.Forms.Label
 $SpaceCleanedValue.text          = "0GB"
@@ -426,22 +444,22 @@ $LogFileLabel.location           = New-Object System.Drawing.Point(20,254)
 $LogFileLabel.Font               = New-Object System.Drawing.Font('Microsoft Sans Serif',14)
 $LogFileLabel.ForeColor          = [System.Drawing.ColorTranslator]::FromHtml("#000000")
 
-$Label1                          = New-Object system.Windows.Forms.Label
-$Label1.text                     = $CreditLabelText
-$Label1.AutoSize                 = $true
-$Label1.width                    = 25
-$Label1.height                   = 10
-$Label1.location                 = New-Object System.Drawing.Point(24,298)
-$Label1.Font                     = New-Object System.Drawing.Font('Microsoft Sans Serif',9)
-$Label1.ForeColor                = [System.Drawing.ColorTranslator]::FromHtml("#9b9b9b")
+$CreditLabel                          = New-Object system.Windows.Forms.Label
+$CreditLabel.text                     = $CreditLabelText
+$CreditLabel.AutoSize                 = $true
+$CreditLabel.width                    = 25
+$CreditLabel.height                   = 10
+$CreditLabel.location                 = New-Object System.Drawing.Point(24,298)
+$CreditLabel.Font                     = New-Object System.Drawing.Font('Microsoft Sans Serif',9)
+$CreditLabel.ForeColor                = [System.Drawing.ColorTranslator]::FromHtml("#9b9b9b")
 
-$DiskSlimmerForm.controls.AddRange(@($SelectDiskLabel,$DriveComboBox,$FreeSpaceLabel,$TotalSpaceLabel,$FreeSpaceValue,$TotalSpaceValue,$JunkFoundLabel,$JunkFoundValue,$CleanDiskBtn,$Label2,$SpaceCleanedValue,$LogFileLabel,$Label1))
+$DiskSlimmerForm.controls.AddRange(@($SelectDiskLabel,$DriveComboBox,$FreeSpaceLabel,$TotalSpaceLabel,$FreeSpaceValue,$TotalSpaceValue,$JunkFoundLabel,$JunkFoundValue,$CleanDiskBtn,$SpaceCleanedLabel,$SpaceCleanedValue,$LogFileLabel,$CreditLabel))
 
 #Assess drive sizes and total up junk that can be cleared
 $NewDriveLetter = $DriveComboBox.Text  
 $LogFileLabel.text = "Analyzing drives..."
 Hide-Console 
-Get-DriveSizeInfo -DriveLetter $NewDriveLetter
+Get-DriveJunk -DriveLetter $NewDriveLetter
 $LogFileLabel.text = "Log File Located: $logfile"
 
 
@@ -459,7 +477,7 @@ $CleanDiskBtn.Add_Click({
         #Hide-Console 
         $LogFileLabel.text = "Log File Located: $logfile"
         #Re-check the junk size after the fact
-        Get-DriveSizeInfo -DriveLetter $NewDriveLetter
+        Get-DriveJunk -DriveLetter $NewDriveLetter
 
     } else {
         Write-Host "Browsers are running... notifying user..."
@@ -471,7 +489,7 @@ $CleanDiskBtn.Add_Click({
 
 $DriveComboBox.Add_SelectedIndexChanged({
     $NewDriveLetter = $DriveComboBox.Text  
-    Assess-Drives -DriveLetter $NewDriveLetter
+    Get-DriveJunk -DriveLetter $NewDriveLetter
 })
 
 #region Logic 
