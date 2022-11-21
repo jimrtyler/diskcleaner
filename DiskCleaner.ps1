@@ -9,6 +9,7 @@
 #Define default log location
 $logfile = "C:\temp\diskcleaner.log"
 
+
 #==========Localization Variables==========
 #GUI Variables
 $FormTitleText = "Disk Cleaner by Jim Tyler (PowerShellEngineer.com)"
