@@ -2,9 +2,11 @@
 .NAME
     DiskCleaner by Jim Tyler, PowerShellEngineer.com
     Twitter: @PowerShellEng
+    Github: @PowerShellEng
+    YouTube: @PowerShellEng
 #>
 
-#Define Log File Location
+#Define default log location
 $logfile = "C:\temp\diskcleaner.log"
 
 #==========Localization Variables==========
@@ -59,11 +61,17 @@ $consolePtr = [Console.Window]::GetConsoleWindow()
 [Console.Window]::ShowWindow($consolePtr, 4) 
 }
 
+
+
 <# 
 .NAME
     DiskCleaner by Jim Tyler, PowerShellEngineer.com
     Twitter: @PowerShellEng
+    Github: @PowerShellEng
+    YouTube: @PowerShellEng
 #>
+
+
 
 #Function to Hide the PowerShell Console Behind the Windows Forms GUI
 function Hide-Console { 
@@ -72,17 +80,21 @@ function Hide-Console {
 	[Console.Window]::ShowWindow($consolePtr, 0) 
 } 
 
+
+
+
+
 #Function to Calculate Drive Size and Junk
 function Get-DriveJunk() {
     [CmdletBinding()]
     param(
         #Drive letter of drive to be checked.
         [Parameter(Position=0,mandatory=$true)]
-        [string] $DriveLetter
+        [string] $DriveLetter,
 
         #Optional - LogFile Location, default is C:\temp\diskcleaner.log
         [Parameter(Position=1,mandatory=$false)]
-        [string] $LogFile 
+        [string] $logfile,
 
         #Optional - Checks files to delete older than the specified day count.
         #For example, if $OlderThan = 30, all files with date modified dates older than 30 days will be deleted when running Clear-DriveJunk.
@@ -146,30 +158,30 @@ function Clear-DriveJunk() {
     param(
         #Drive to be cleaned
         [Parameter(Position=0,mandatory=$true)]
-        [string] $DriveLetter
+        [string] $DriveLetter,
 
         #Optional - LogFile Location, default is C:\temp\diskcleaner.log
         [Parameter(Position=1,mandatory=$false)]
-        [string] $LogFile 
+        [string] $LogFile, 
 
         #Deletes files older than the specified day count.
         #For example, if $OlderThan = 30, all files with date modified dates older than 30 days will be deleted.      
         [Parameter(Position=2,mandatory=$false)]
-        [int32] $OlderThan 
+        [int32] $OlderThan,
 
         #Empty Recycle Bin for specified drive; empties by default
         #Set to $true/$false
         [Parameter(Position=3,mandatory=$false)]
-        [bool] $EmptyRecycleBin
+        [bool] $EmptyRecycleBin,
 
         #Ignore if Browsers are open and attempt to delete files. It may cause issues with open browsers.
         #By default, this script asks to you to close all browsers and halts processing.
         #Set to $true/$false
         [Parameter(Position=4,mandatory=$false)]
-        [bool] $IgnoreBrowsers
+        [bool] $IgnoreBrowsers,
 
-        #Ignore if Browsers are open and attempt to delete files. It may cause issues with open browsers.
-        #By default, this script asks to you to close all browsers and halts processing.
+        #Automatically close all browser processes before cleaning if set to true.
+        #By default, this will be false if not set
         #Set to $true/$false
         [Parameter(Position=5,mandatory=$false)]
         [bool] $CloseBrowsers
@@ -213,9 +225,9 @@ function Clear-DriveJunk() {
                 $junkFound += $dir.Sum
 
                 #Actually delete the contents of the folder
-                Get-ChildItem -Path $path -Include *.* -File -Recurse | ForEach-Object { 
-                    Remove-Item -Path $_ -Force 
-                    if((Test-Path -path $_) -eq $true) { $junkNotRemoved += $dir.sum } else { $junkRemoved += $dir.sum }
+                Get-ChildItem -Path $path -Include *.* -File -Recurse | ForEach-Object {
+                     Remove-Item -Path $_ -Force
+                     if((Test-Path -path $_) -eq $true) { $junkNotRemoved += $dir.sum } else { $junkRemoved += $dir.sum } 
                 }
 
             } else {
@@ -231,16 +243,23 @@ function Clear-DriveJunk() {
                 if((Test-Path -path $path) -eq $true) { $junkNotRemoved += $dir.sum } else { $junkRemoved += $dir.sum }
             }
             #end assessing if it's a directory
-        } else {
-
-            Write-Host "We can't seem to find $path"
-
-        }
+        } 
     }
 
 
     #Empty Recycle Bin if variable is not set or set to $true
-    if($EmptyRecycleBin -eq $false) else { Clear-RecycleBin -DriveLetter $DriveLetter -Force }
+    if($EmptyRecycleBin -eq $false) { 
+        $timestamp = Get-Date
+        $msg = "$timestamp - Not emptying recycle bin..."
+        Write-Host $msg 
+        $msg | Add-Content $logfile
+    } else { 
+        $timestamp = Get-Date
+        $msg = "$timestamp - Emptying recycle bin..."
+        Write-Host $msg 
+        $msg | Add-Content $logfile
+        Clear-RecycleBin -DriveLetter $DriveLetter -Force 
+    }
 
     #Create custom hashtable with results.
     $returnHashTable = @{
@@ -415,8 +434,9 @@ $DiskSlimmerForm.controls.AddRange(@($SelectDiskLabel,$DriveComboBox,$FreeSpaceL
 #Assess drive sizes and total up junk that can be cleared
 $NewDriveLetter = $DriveComboBox.Text  
 $LogFileLabel.text = "Analyzing drives..."
-Hide-Console 
-Get-DriveSizeInfo -DriveLetter $NewDriveLetter
+#Hide-Console 
+$GetDriveJunk = Get-DriveJunk -DriveLetter $NewDriveLetter
+$JunkFoundValue.text = $GetDriveJunk.JunkFound
 $LogFileLabel.text = "Log File Located: $logfile"
 
 
@@ -430,11 +450,13 @@ $CleanDiskBtn.Add_Click({
     if($BrowserCheck -eq $false) {
         Write-Host "Browsers are not running... proceeding with disk cleanup..."
         $NewDriveLetter = $DriveComboBox.Text  
-        Clear-DriveJunk -DriveLetter $NewDriveLetter
+        $ClearDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter
+        $SpaceCleanedValue.text = $ClearDriveJunk.JunkRemoved
         #Hide-Console 
         $LogFileLabel.text = "Log File Located: $logfile"
         #Re-check the junk size after the fact
-        Get-DriveJunk -DriveLetter $NewDriveLetter
+        $GetDriveJunk = Get-DriveJunk -DriveLetter $NewDriveLetter
+        $JunkFoundValue.text = $GetDriveJunk.JunkFound
 
     } else {
         Write-Host "Browsers are running... notifying user..."
@@ -445,8 +467,8 @@ $CleanDiskBtn.Add_Click({
 })
 
 $DriveComboBox.Add_SelectedIndexChanged({
-    $NewDriveLetter = $DriveComboBox.Text  
-    Get-DriveJunk -DriveLetter $NewDriveLetter
+    $GetDriveJunk = Get-DriveJunk -DriveLetter $NewDriveLetter
+    $JunkFoundValue.text = $GetDriveJunk.JunkFound
 })
 
 #region Logic 
@@ -454,6 +476,8 @@ $DriveComboBox.Add_SelectedIndexChanged({
 .NAME
     DiskCleaner by Jim Tyler, PowerShellEngineer.com
     Twitter: @PowerShellEng
+    Github: @PowerShellEng
+    YouTube: @PowerShellEng
 #>
 #endregion
 
