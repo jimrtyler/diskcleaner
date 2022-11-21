@@ -124,7 +124,7 @@ function Get-DriveSizeInfo() {
     "$DriveString\Windows\Temp",
     "$env:LOCALAPPDATA\Temp",
     "$env:LOCALAPPDATA\Microsoft\Windows\INetCache",
-    "$env:LOCALAPPDATA\Microsoft\Edge\User Data"
+    "$env:LOCALAPPDATA\Microsoft\Edge\User Data",
     "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cache")
 
 
