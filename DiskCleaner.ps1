@@ -230,7 +230,7 @@ $DiskSlimmerForm.controls.AddRange(@($SelectDiskLabel,$DriveComboBox,$FreeSpaceL
 #Assess drive sizes and total up junk that can be cleared
 $NewDriveLetter = $DriveComboBox.Text  
 $LogFileLabel.text = "Analyzing drives..."
-#Hide-Console 
+Hide-Console 
 $GetDriveJunk = Get-DriveJunk -DriveLetter $NewDriveLetter
 $JunkFoundValue.text = $GetDriveJunk.JunkFound
 $LogFileLabel.text = "Log File Located: $logfile"
