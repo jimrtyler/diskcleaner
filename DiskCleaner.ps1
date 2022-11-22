@@ -29,7 +29,7 @@ Add-Type -Name Window -Namespace Console -MemberDefinition ' [DllImport("Kernel3
 $c = Get-Volume -DriveLetter C
 
 #Import Custom Module with Clear Disk Functions
-Import-Module .\ClearDiskJunk
+Import-Module .\ClearDiskJunk\ClearDiskJunk.psm1
 
 #Function to Show the PowerShell Console Behind the Windows Forms GUI
 function Show-Console { 
@@ -71,6 +71,21 @@ function Hide-Console {
 } 
 
 
+
+#Function to determine if browsers are running
+function Select-BrowserProcesses() {
+    $runningCount = 0
+    if(Get-Process | Where-Object {$_.ProcessName -like "*Edge*"}) { $runningCount++ }
+    if(Get-Process | Where-Object {$_.ProcessName -like "*Chrome*"}) { $runningCount++ }
+    if(Get-Process | Where-Object {$_.ProcessName -like "*Firefox*"}) { $runningCount++ }
+    if(Get-Process | Where-Object {$_.ProcessName -like "*Opera*"}) { $runningCount++ }
+    if(Get-Process | Where-Object {$_.ProcessName -like "*Iexplore*"}) { $runningCount++ }
+    if($runningCount -gt 0) {
+        return $true
+    } else {
+        return $false
+    }
+}
 
 
 
@@ -230,8 +245,10 @@ $DiskSlimmerForm.controls.AddRange(@($SelectDiskLabel,$DriveComboBox,$FreeSpaceL
 #Assess drive sizes and total up junk that can be cleared
 $NewDriveLetter = $DriveComboBox.Text  
 $LogFileLabel.text = "Analyzing drives..."
-Hide-Console 
-$GetDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $false
+
+#Hide the console before GUI loads while drives are being assessed. 
+#Hide-Console 
+$GetDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $false -LogFile "C:\temp\diskcleaner.log"
 $JunkFoundValue.text = $GetDriveJunk.JunkFound
 $LogFileLabel.text = "Log File Located: $logfile"
 
@@ -246,12 +263,12 @@ $CleanDiskBtn.Add_Click({
     if($BrowserCheck -eq $false) {
         Write-Host "Browsers are not running... proceeding with disk cleanup..."
         $NewDriveLetter = $DriveComboBox.Text  
-        $ClearDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $true
+        $ClearDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $true -LogFile "C:\temp\diskcleaner.log"
         $SpaceCleanedValue.text = $ClearDriveJunk.JunkRemoved
         #Hide-Console 
         $LogFileLabel.text = "Log File Located: $logfile"
         #Re-check the junk size after the fact
-        $GetDriveJunk = Get-DriveJunk -DriveLetter $NewDriveLetter
+        $GetDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $false -LogFile "C:\temp\diskcleaner.log"
         $JunkFoundValue.text = $GetDriveJunk.JunkFound
 
     } else {
@@ -263,7 +280,7 @@ $CleanDiskBtn.Add_Click({
 })
 
 $DriveComboBox.Add_SelectedIndexChanged({
-    $GetDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $false
+    $GetDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $false -LogFile "C:\temp\diskcleaner.log"
     $JunkFoundValue.text = $GetDriveJunk.JunkFound
 })
 
