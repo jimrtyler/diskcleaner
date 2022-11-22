@@ -141,7 +141,7 @@ function Clear-DriveJunk() {
                 if($ActuallyDeleteFiles -eq $true) { Remove-Item -Path $path -Force }
 
                 #Test if it was actually deleted or not, total the correct counter 
-                if((Test-Path -path $path) -eq $true) { $junkNotRemoved += $dir.sum } else { $junkRemoved += $dir.sum }
+                if((Test-Path -path $path) -eq $true) { $junkNotRemoved += $file.sum } else { $junkRemoved += $file.sum }
             }
             #end assessing if it's a directory
         } 
