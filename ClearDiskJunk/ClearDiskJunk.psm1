@@ -7,13 +7,13 @@
   forcibly removing them.
 
  .Parameter DriveLetter
-  The first month to display.
+  Mandatory string - drive letter of disk/volume to be assessed or cleared. Use the Get-Volume cmdlet to see your drive letters.
 
  .Parameter ActuallyDeleteFiles
   Mandatory boolean that can be set to $true or $false. If $true, files will actually be deleted.
 
  .Parameter LogFile
-  The day of the month on which the week begins.
+  Optional string - path to log file.
 
  .Parameter OlderThan
   Specific days (numbered) to highlight. Used for date ranges like (25..31).
