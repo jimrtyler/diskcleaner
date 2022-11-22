@@ -1,9 +1,39 @@
-<# 
-.NAME
-    DiskCleaner Module by Jim Tyler, PowerShellEngineer.com
-    Twitter: @PowerShellEng
-    Github: @PowerShellEng
-    YouTube: @PowerShellEng
+<#
+ .Synopsis
+  Clears unwanted temporary, cache, and log files. 
+
+ .Description
+  Iterates through a list of common temporary, cache, and log paths, assessing their size and
+  forcibly removing them.
+
+ .Parameter DriveLetter
+  The first month to display.
+
+ .Parameter ActuallyDeleteFiles
+  Mandatory boolean that can be set to $true or $false. If $true, files will actually be deleted.
+
+ .Parameter LogFile
+  The day of the month on which the week begins.
+
+ .Parameter OlderThan
+  Specific days (numbered) to highlight. Used for date ranges like (25..31).
+  Date ranges are specified by the Windows PowerShell range syntax. These dates are
+  enclosed in square brackets.
+
+ .Parameter EmptyRecycleBin
+  Specific days (named) to highlight. These dates are surrounded by asterisks.
+
+ .Example
+   # Simplest usage of the function that does NOT delete files.
+   Clear-DriveJunk -DriveLetter "C" -ActuallyDeleteFiles $false
+
+ .Example
+   # Simplest usage of the function that DOES delete files.
+   Clear-DriveJunk -DriveLetter "C" -ActuallyDeleteFiles $true
+
+ .Example
+   # Deletes temporary, log, and cache files older than 30 days on drive C, storing log to C:\temp\delete.log
+   Clear-DriveJunk -DriveLetter "C" -ActuallyDeleteFiles $true -LogFile "C:\temp\delete.log" -OlderThan -30 -EmptyRecycleBin $true
 #>
 
 
@@ -46,19 +76,8 @@ function Clear-DriveJunk() {
         #Empty Recycle Bin for specified drive; empties by default
         #Set to $true/$false
         [Parameter(Position=4,mandatory=$false)]
-        [bool] $EmptyRecycleBin,
+        [bool] $EmptyRecycleBin
 
-        #Ignore if Browsers are open and attempt to delete files. It may cause issues with open browsers.
-        #By default, this script asks to you to close all browsers and halts processing.
-        #Set to $true/$false
-        [Parameter(Position=5,mandatory=$false)]
-        [bool] $IgnoreBrowsers,
-
-        #Automatically close all browser processes before cleaning if set to true.
-        #By default, this will be false if not set
-        #Set to $true/$false
-        [Parameter(Position=6,mandatory=$false)]
-        [bool] $CloseBrowsers
     )
 
     #Write log that slimming has started...
