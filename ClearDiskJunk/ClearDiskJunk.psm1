@@ -22,74 +22,6 @@ function Select-BrowserProcesses() {
 }
 
 
-#Function to Calculate Drive Size and Junk
-function Get-DriveJunk() {
-    [CmdletBinding()]
-    param(
-        #Drive letter of drive to be checked.
-        [Parameter(Position=0,mandatory=$true)]
-        [string] $DriveLetter,
-
-        #Optional - LogFile Location, default is C:\temp\diskcleaner.log
-        [Parameter(Position=1,mandatory=$false)]
-        [string] $logfile,
-
-        #Optional - Checks files to delete older than the specified day count.
-        #For example, if $OlderThan = 30, all files with date modified dates older than 30 days will be deleted when running Clear-DriveJunk.
-        [Parameter(Position=1,mandatory=$false)]
-        [int32] $OlderThan 
-    )
-
-    #Building the drive string; the environment has an issue when you try to echo a string with the value of 
-    $colon = ":"
-    $DriveString = "$DriveLetter$colon"
-    
-    #Paths array - paths of directories and log files that build up over time and need to be cleared. 
-    $pathsToClear = @("C:\WINDOWS\SoftwareDistribution\Download","$DriveString\WINDOWS\winsxs\backup","$DriveString\WINDOWS\Installer\$PatchCache$","$DriveString\WINDOWS\help","$DriveString\WINDOWS\Web\Wallpaper","$DriveString\Windows\Installer","$DriveString\Windows\Logs\WindowsUpdate","$DriveString\Windows\Logs\waasmediccapsule","$DriveString\Windows\Logs\waasmedic","$DriveString\Windows\Logs\SIH","$DriveString\Windows\Logs\NetSetup","$DriveString\Windows\Logs\MoSetup","$DriveString\Windows\Logs\MeasuredBoot","$DriveString\Windows\Logs\DPX","$DriveString\Windows\Logs\DISM","$DriveString\Windows\Logs\CBS","$DriveString\Windows\Logs\StorGroupPolicy.log","$DriveString\Windows\System32\CatRoot2\dberr.txt","$DriveString\Windows\debug","$DriveString\Windows\security\logs\scecomp.old","$DriveString\Windows\security\logs\scecomp.log","$DriveString\Windows\SysWOW64\Gms.log","$DriveString\Windows\SharedPCSetup.log","$DriveString\Windows\stuperr.log","$DriveString\Windows\setupact.log","$DriveString\Windows\PFRO.log","$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*","$env:LOCALAPPDATA\Microsoft\Terminal Server Client\Cache","$DriveString\Windows\system32\FNTCACHE.DAT","$DriveString\Windows\Temp","$env:LOCALAPPDATA\Temp","$env:LOCALAPPDATA\Microsoft\Edge\User Data","$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cache")                    #Script by Jim Tyler, PowerShellEngineer.com                                                
-
-    Foreach ($path in $pathsToClear) {
-
-        #Check if it exists
-        if(Test-Path -Path $path) {
-
-            #Write-Host "We found stuff at $path"
-
-            #Check to see if the path is a directory. Calculating size of a directory vs. a file is different
-            $isDir = (Get-Item $path) -is [System.IO.DirectoryInfo]
-            if($isDir) {
-                Write-Host "Directory: $path"
-                $dir = Get-ChildItem -Path $path -Recurse -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum | Select-Object Sum, Count
-                $junkFound += $dir.Sum
-            } else {
-                Write-Host "File: $path"
-                $file = Get-ChildItem -Path $path -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum | Select-Object Sum, Count
-                $junkFound += $file.Sum
-            }
-            #end assessing if it's a directory
-        } else {
-
-            Write-Host "We can't seem to find $path"
-
-        }
-    }
-
-    #Create custom hashtable with results.
-    $returnHashTable = @{
-
-        "JunkFound" = [math]::Round(($junkFound/ 1GB),2)
-
-    }
-    
-    #Return that table as an object
-    return new-object psobject -Property $returnHashTable
-
-}#End Clear-DriveJunk function Declaration
-
-
-
-
-
-
 
 function Clear-DriveJunk() {
     [CmdletBinding()]
@@ -98,30 +30,34 @@ function Clear-DriveJunk() {
         [Parameter(Position=0,mandatory=$true)]
         [string] $DriveLetter,
 
+        #Mandatory - Decide if you want to actually delete files or not. If $true, it will delete. If not, it will just calculate what would have been deleted.
+        [Parameter(Position=1,mandatory=$true)]
+        [bool] $ActuallyDeleteFiles, 
+
         #Optional - LogFile Location, default is C:\temp\diskcleaner.log
-        [Parameter(Position=1,mandatory=$false)]
+        [Parameter(Position=2,mandatory=$false)]
         [string] $LogFile, 
 
         #Deletes files older than the specified day count.
         #For example, if $OlderThan = 30, all files with date modified dates older than 30 days will be deleted.      
-        [Parameter(Position=2,mandatory=$false)]
+        [Parameter(Position=3,mandatory=$false)]
         [int32] $OlderThan,
 
         #Empty Recycle Bin for specified drive; empties by default
         #Set to $true/$false
-        [Parameter(Position=3,mandatory=$false)]
+        [Parameter(Position=4,mandatory=$false)]
         [bool] $EmptyRecycleBin,
 
         #Ignore if Browsers are open and attempt to delete files. It may cause issues with open browsers.
         #By default, this script asks to you to close all browsers and halts processing.
         #Set to $true/$false
-        [Parameter(Position=4,mandatory=$false)]
+        [Parameter(Position=5,mandatory=$false)]
         [bool] $IgnoreBrowsers,
 
         #Automatically close all browser processes before cleaning if set to true.
         #By default, this will be false if not set
         #Set to $true/$false
-        [Parameter(Position=5,mandatory=$false)]
+        [Parameter(Position=6,mandatory=$false)]
         [bool] $CloseBrowsers
     )
 
@@ -164,8 +100,12 @@ function Clear-DriveJunk() {
 
                 #Actually delete the contents of the folder
                 Get-ChildItem -Path $path -Include *.* -File -Recurse | ForEach-Object {
-                     Remove-Item -Path $_ -Force
-                     if((Test-Path -path $_) -eq $true) { $junkNotRemoved += $dir.sum } else { $junkRemoved += $dir.sum } 
+                    
+                    #Only delete if the $ActuallyDeleteFiles parameter is set to $true. This is a mandatory parameter.
+                    if($ActuallyDeleteFiles -eq $true) { Remove-Item -Path $_ -Force }
+                    
+                    #Test if it was actually deleted or not, total the correct counter 
+                    if((Test-Path -path $_) -eq $true) { $junkNotRemoved += $dir.sum } else { $junkRemoved += $dir.sum } 
                 }
 
             } else {
@@ -176,8 +116,12 @@ function Clear-DriveJunk() {
                 $file = Get-ChildItem -Path $path -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum | Select-Object Sum, Count
                 $junkFound += $file.Sum
 
-                #Actually delete the file 
-                Remove-Item -Path $path -Force
+                #Actually delete the file
+                
+                #Only delete if the $ActuallyDeleteFiles parameter is set to $true. This is a mandatory parameter.
+                if($ActuallyDeleteFiles -eq $true) { Remove-Item -Path $path -Force }
+
+                #Test if it was actually deleted or not, total the correct counter 
                 if((Test-Path -path $path) -eq $true) { $junkNotRemoved += $dir.sum } else { $junkRemoved += $dir.sum }
             }
             #end assessing if it's a directory
@@ -199,12 +143,15 @@ function Clear-DriveJunk() {
         Clear-RecycleBin -DriveLetter $DriveLetter -Force 
     }
 
+    #If files were actually deleted, preserve the total. If not, set the JunkeRemoved being returned to zero
+    if($ActuallyDeleteFiles -eq $true) { $JunkRemovedReturn = [math]::Round(($junkRemoved/ 1GB),2) } else { $JunkRemovedReturn = "0" }
+
     #Create custom hashtable with results.
     $returnHashTable = @{
 
         "JunkFound" = [math]::Round(($junkFound/ 1GB),2)
 
-        "JunkRemoved" = [math]::Round(($junkRemoved/ 1GB),2)
+        "JunkRemoved" = $JunkRemovedReturn
 
         "JunkNotRemoved" = [math]::Round(($junkNotRemoved/ 1GB),2)
 
@@ -217,5 +164,4 @@ function Clear-DriveJunk() {
 
 #Export Module Member
 Export-ModuleMember -Function 'Clear-DiskJunk'
-Export-ModuleMember -Function 'Get-DriveJunk'
 Export-ModuleMember -Function 'Select-BrowserProcesses'

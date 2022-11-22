@@ -231,7 +231,7 @@ $DiskSlimmerForm.controls.AddRange(@($SelectDiskLabel,$DriveComboBox,$FreeSpaceL
 $NewDriveLetter = $DriveComboBox.Text  
 $LogFileLabel.text = "Analyzing drives..."
 Hide-Console 
-$GetDriveJunk = Get-DriveJunk -DriveLetter $NewDriveLetter
+$GetDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $false
 $JunkFoundValue.text = $GetDriveJunk.JunkFound
 $LogFileLabel.text = "Log File Located: $logfile"
 
@@ -246,7 +246,7 @@ $CleanDiskBtn.Add_Click({
     if($BrowserCheck -eq $false) {
         Write-Host "Browsers are not running... proceeding with disk cleanup..."
         $NewDriveLetter = $DriveComboBox.Text  
-        $ClearDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter
+        $ClearDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $true
         $SpaceCleanedValue.text = $ClearDriveJunk.JunkRemoved
         #Hide-Console 
         $LogFileLabel.text = "Log File Located: $logfile"
@@ -263,7 +263,7 @@ $CleanDiskBtn.Add_Click({
 })
 
 $DriveComboBox.Add_SelectedIndexChanged({
-    $GetDriveJunk = Get-DriveJunk -DriveLetter $NewDriveLetter
+    $GetDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $false
     $JunkFoundValue.text = $GetDriveJunk.JunkFound
 })
 
