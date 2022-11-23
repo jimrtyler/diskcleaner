@@ -261,15 +261,13 @@ $CleanDiskBtn.Add_Click({
     $BrowserCheck = Select-BrowserProcesses
 
     if($BrowserCheck -eq $false) {
-        Write-Host "Browsers are not running... proceeding with disk cleanup..."
+        #Browsers are not running, so clean the disk.
         $NewDriveLetter = $DriveComboBox.Text  
         $ClearDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $true -LogFile $LogFile
         $SpaceCleanedValue.text = $ClearDriveJunk.JunkRemoved
-        #Hide-Console 
+
+        #Reset the Log File Label to the log file location (at this point, it says Cleaning drive...)
         $LogFileLabel.text = "Log File Located: $LogFile"
-        #Re-check the junk size after the fact
-        #$GetDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $false -LogFile $LogFile
-        #$JunkFoundValue.text = $GetDriveJunk.JunkFound
 
         #Reset drive free space label
         $drive = Get-Volume -DriveLetter $NewDriveLetter
