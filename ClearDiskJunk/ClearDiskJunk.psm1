@@ -93,7 +93,16 @@ function Clear-DriveJunk() {
                     $fileInDir = Get-ChildItem -Path $_ -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum | Select-Object Sum, Count
 
                     #Only delete if the $ActuallyDeleteFiles parameter is set to $true. This is a mandatory parameter.
-                    if($ActuallyDeleteFiles -eq $true) { Remove-Item -Path $_ -Force }
+                    if($ActuallyDeleteFiles -eq $true) { 
+                        try {
+                            Remove-Item -Path $_ -Force  
+                        }
+                        catch {
+                            Write-Host "Unable to delete $_"
+                        }    
+                        
+                    
+                    }
                     
                     #Test if it was actually deleted or not, total the correct counter 
                     if((Test-Path -path $_) -eq $true) { 
@@ -130,7 +139,15 @@ function Clear-DriveJunk() {
                 #Actually delete the file
                 
                 #Only delete if the $ActuallyDeleteFiles parameter is set to $true. This is a mandatory parameter.
-                if($ActuallyDeleteFiles -eq $true) { Remove-Item -Path $path -Force }
+                if($ActuallyDeleteFiles -eq $true) { 
+                    try {
+                        Remove-Item -Path $path -Force 
+                    }
+                    catch {
+                        Write-Host "Unable to delete $path"
+                    }
+                    
+                }
 
                 #Test if it was actually deleted or not, total the correct counter 
                 if((Test-Path -path $path) -eq $true) { 
