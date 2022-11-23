@@ -7,7 +7,7 @@
 #>
 
 #Define default log location
-$logfile = "C:\temp\diskcleaner.log"
+$LogFile = "C:\temp\diskcleaner.log"
 
 
 #==========Localization Variables==========
@@ -247,8 +247,8 @@ $NewDriveLetter = $DriveComboBox.Text
 $LogFileLabel.text = "Analyzing drives..."
 
 #Hide the console before GUI loads while drives are being assessed. 
-#Hide-Console 
-$GetDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $false -LogFile "C:\temp\diskcleaner.log"
+Hide-Console 
+$GetDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $false -LogFile $LogFile
 $JunkFoundValue.text = $GetDriveJunk.JunkFound
 $LogFileLabel.text = "Log File Located: $logfile"
 
@@ -263,13 +263,17 @@ $CleanDiskBtn.Add_Click({
     if($BrowserCheck -eq $false) {
         Write-Host "Browsers are not running... proceeding with disk cleanup..."
         $NewDriveLetter = $DriveComboBox.Text  
-        $ClearDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $true -LogFile "C:\temp\diskcleaner.log"
+        $ClearDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $true -LogFile $LogFile
         $SpaceCleanedValue.text = $ClearDriveJunk.JunkRemoved
         #Hide-Console 
-        $LogFileLabel.text = "Log File Located: $logfile"
+        $LogFileLabel.text = "Log File Located: $LogFile"
         #Re-check the junk size after the fact
-        $GetDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $false -LogFile "C:\temp\diskcleaner.log"
-        $JunkFoundValue.text = $GetDriveJunk.JunkFound
+        #$GetDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $false -LogFile $LogFile
+        #$JunkFoundValue.text = $GetDriveJunk.JunkFound
+
+        #Reset drive free space label
+        $drive = Get-Volume -DriveLetter $NewDriveLetter
+        $FreeSpaceValue.text = [math]::Round(($drive.SizeRemaining / 1GB),2)
 
     } else {
         Write-Host "Browsers are running... notifying user..."
@@ -280,8 +284,15 @@ $CleanDiskBtn.Add_Click({
 })
 
 $DriveComboBox.Add_SelectedIndexChanged({
-    $GetDriveJunk = Clear-DriveJunk -DriveLetter $NewDriveLetter -ActuallyDeleteFiles $false -LogFile "C:\temp\diskcleaner.log"
+    #Reset drive free space label
+    $drive = Get-Volume -DriveLetter $DriveComboBox.Text  
+    $FreeSpaceValue.text = [math]::Round(($drive.SizeRemaining / 1GB),2)
+    $TotalSpaceValue.text = [math]::Round(($drive.Size / 1GB),2)
+
+    #Calculate the junk on the newly selected drive
+    $GetDriveJunk = Clear-DriveJunk -DriveLetter $DriveComboBox.Text -ActuallyDeleteFiles $false -LogFile "C:\temp\diskcleaner.log"
     $JunkFoundValue.text = $GetDriveJunk.JunkFound
+
 })
 
 #region Logic 

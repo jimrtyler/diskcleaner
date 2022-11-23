@@ -13,7 +13,7 @@
   Mandatory boolean that can be set to $true or $false. If $true, files will actually be deleted.
 
  .Parameter LogFile
-  Optional string - path to log file.
+  Mandatory string - path to log file.
 
  .Example
    # Simplest usage of the function that does NOT delete files.
@@ -64,7 +64,7 @@ function Clear-DriveJunk() {
     $colon = ":"
     $DriveString = "$DriveLetter$colon"
 
-    $pathsToClear = @("C:\WINDOWS\SoftwareDistribution\Download","$DriveString\WINDOWS\winsxs\backup","$DriveString\WINDOWS\help","$DriveString\WINDOWS\Web\Wallpaper","$DriveString\Windows\Logs\WindowsUpdate","$DriveString\Windows\Logs\waasmediccapsule","$DriveString\Windows\Logs\waasmedic","$DriveString\Windows\Logs\SIH","$DriveString\Windows\Logs\NetSetup","$DriveString\Windows\Logs\MoSetup","$DriveString\Windows\Logs\MeasuredBoot","$DriveString\Windows\Logs\DPX","$DriveString\Windows\Logs\DISM","$DriveString\Windows\Logs\CBS","$DriveString\Windows\Logs\StorGroupPolicy.log","$DriveString\Windows\System32\CatRoot2\dberr.txt","$DriveString\Windows\debug","$DriveString\Windows\security\logs\scecomp.old","$DriveString\Windows\security\logs\scecomp.log","$DriveString\Windows\SysWOW64\Gms.log","$DriveString\Windows\SharedPCSetup.log","$DriveString\Windows\stuperr.log","$DriveString\Windows\setupact.log","$DriveString\Windows\PFRO.log","$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*","$env:LOCALAPPDATA\Microsoft\Terminal Server Client\Cache","$DriveString\Windows\system32\FNTCACHE.DAT","$DriveString\Windows\Temp","$env:LOCALAPPDATA\Temp","$env:LOCALAPPDATA\Microsoft\Edge\User Data","$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cache","$DriveString\WINDOWS\Installer\$PatchCache$","$DriveString\Windows\Installer")                    #Script by Jim Tyler, PowerShellEngineer.com                                                
+    $pathsToClear = @("$DriveString\WINDOWS\SoftwareDistribution\Download","$DriveString\WINDOWS\winsxs\backup","$DriveString\WINDOWS\help","$DriveString\WINDOWS\Web\Wallpaper","$DriveString\Windows\Logs\WindowsUpdate","$DriveString\Windows\Logs\waasmediccapsule","$DriveString\Windows\Logs\waasmedic","$DriveString\Windows\Logs\SIH","$DriveString\Windows\Logs\NetSetup","$DriveString\Windows\Logs\MoSetup","$DriveString\Windows\Logs\MeasuredBoot","$DriveString\Windows\Logs\DPX","$DriveString\Windows\Logs\DISM","$DriveString\Windows\Logs\CBS","$DriveString\Windows\Logs\StorGroupPolicy.log","$DriveString\Windows\System32\CatRoot2\dberr.txt","$DriveString\Windows\debug","$DriveString\Windows\security\logs\scecomp.old","$DriveString\Windows\security\logs\scecomp.log","$DriveString\Windows\SysWOW64\Gms.log","$DriveString\Windows\SharedPCSetup.log","$DriveString\Windows\stuperr.log","$DriveString\Windows\setupact.log","$DriveString\Windows\PFRO.log","$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*","$env:LOCALAPPDATA\Microsoft\Terminal Server Client\Cache","$DriveString\Windows\system32\FNTCACHE.DAT","$DriveString\Windows\Temp","$env:LOCALAPPDATA\Temp","$env:LOCALAPPDATA\Microsoft\Edge\User Data","$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cache") #"$DriveString\WINDOWS\Installer\$PatchCache$","$DriveString\Windows\Installer")                    #Script by Jim Tyler, PowerShellEngineer.com                                                
 
     Foreach ($path in $pathsToClear) {
 
@@ -89,6 +89,9 @@ function Clear-DriveJunk() {
                 #Actually delete the contents of the folder
                 Get-ChildItem -Path $path -Include *.* -File -Recurse | ForEach-Object {
                     
+                    #Assess the size of the specific file before it is deleted.
+                    $fileInDir = Get-ChildItem -Path $_ -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum | Select-Object Sum, Count
+
                     #Only delete if the $ActuallyDeleteFiles parameter is set to $true. This is a mandatory parameter.
                     if($ActuallyDeleteFiles -eq $true) { Remove-Item -Path $_ -Force }
                     
@@ -101,8 +104,7 @@ function Clear-DriveJunk() {
                         #$msg | Add-Content $LogFile
 
                         #Total counter of size of files deleted
-                        #$fileInDir = Get-ChildItem -Path $_ -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum | Select-Object Sum, Count
-                        #$junkNotRemoved += $fileInDir.sum 
+                        $junkNotRemoved += $fileInDir.Sum 
                     } else { 
                         #Log if file was deleted
                         #$timestamp = Get-Date
@@ -111,8 +113,7 @@ function Clear-DriveJunk() {
                         #$msg | Add-Content $LogFile
 
                         #Total counter of size of files deleted
-                        $fileInDir = Get-ChildItem -Path $_ -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum | Select-Object Sum, Count
-                        $junkRemoved += $fileInDir.sum 
+                        $junkRemoved += $fileInDir.Sum 
                     } 
                 }
 
@@ -140,7 +141,7 @@ function Clear-DriveJunk() {
                     #$msg | Add-Content $LogFile
 
                     #Total the size of the files not deleted
-                    #$junkNotRemoved += $file.sum 
+                    $junkNotRemoved += $junkFound
                 } else { 
                     #Write to the log file
                     #$timestamp = Get-Date
@@ -149,7 +150,7 @@ function Clear-DriveJunk() {
                     #$msg | Add-Content $LogFile
 
                     #Total the size of the files deleted
-                    $junkRemoved += $file.sum 
+                    $junkRemoved += $junkFound
                 }
             }
             #end assessing if it's a directory
