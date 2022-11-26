@@ -27,7 +27,13 @@
    # Deletes temporary, log, and cache files older than 30 days on drive C, storing log to C:\temp\delete.log
    Clear-DriveJunk -DriveLetter "C" -ActuallyDeleteFiles $true -LogFile "C:\temp\delete.log" -OlderThan -30 -EmptyRecycleBin $true
 #>
-
+<# 
+.NAME
+    DiskCleaner by Jim Tyler, PowerShellEngineer.com
+    Twitter: @jimrtyler
+    Github: @jimrtyler
+    YouTube: @PowerShellEngineer
+#>
 
 function Clear-DriveJunk() {
     [CmdletBinding()]
@@ -204,3 +210,38 @@ function Clear-DriveJunk() {
 
 #Export Module Member
 Export-ModuleMember -Function 'Clear-DriveJunk'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<# 
+.NAME
+    DiskCleaner by Jim Tyler, PowerShellEngineer.com
+    Twitter: @jimrtyler
+    Github: @jimrtyler
+    YouTube: @PowerShellEngineer
+#>

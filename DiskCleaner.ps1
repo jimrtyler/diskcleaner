@@ -1,9 +1,9 @@
 <# 
 .NAME
     DiskCleaner by Jim Tyler, PowerShellEngineer.com
-    Twitter: @PowerShellEng
-    Github: @PowerShellEng
-    YouTube: @PowerShellEng
+    Twitter: @jimrtyler
+    Github: @jimrtyler
+    YouTube: @PowerShellEngineer
 #>
 
 #Define default log location
@@ -56,9 +56,9 @@ $consolePtr = [Console.Window]::GetConsoleWindow()
 <# 
 .NAME
     DiskCleaner by Jim Tyler, PowerShellEngineer.com
-    Twitter: @PowerShellEng
-    Github: @PowerShellEng
-    YouTube: @PowerShellEng
+    Twitter: @jimrtyler
+    Github: @jimrtyler
+    YouTube: @PowerShellEngineer
 #>
 
 
@@ -95,9 +95,9 @@ function Select-BrowserProcesses() {
 <# 
 .NAME
     DiskCleaner by Jim Tyler, PowerShellEngineer.com
-    Twitter: @PowerShellEng
-    Github: @PowerShellEng
-    YouTube: @PowerShellEng
+    Twitter: @jimrtyler
+    Github: @jimrtyler
+    YouTube: @PowerShellEngineer
 #>
 
 
@@ -297,9 +297,9 @@ $DriveComboBox.Add_SelectedIndexChanged({
 <# 
 .NAME
     DiskCleaner by Jim Tyler, PowerShellEngineer.com
-    Twitter: @PowerShellEng
-    Github: @PowerShellEng
-    YouTube: @PowerShellEng
+    Twitter: @jimrtyler
+    Github: @jimrtyler
+    YouTube: @PowerShellEngineer
 #>
 #endregion
 
