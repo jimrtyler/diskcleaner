@@ -16,6 +16,21 @@ DiskCleaner is a user-friendly PowerShell GUI script designed to analyze and cle
 
 ---
 
+## One Liner Usage
+1. Open PowerShell as Administrator
+2. Run this command:
+   ```powershell
+   IEX(Invoke-WebRequest 'https://raw.githubusercontent.com/jimrtyler/diskcleaner/refs/heads/main/DiskCleanerStandalone.ps1'); Clear-DriveJunk -DriveLetter "C" -ActuallyDeleteFiles $true -LogFile ".\diskcleaner.log"
+
+## Usage
+
+1. Open PowerShell as Administrator.
+2. Run the script:
+   ```powershell
+   .\DiskCleaner.ps1
+
+---
+
 ## Features
 
 - **Interactive GUI**: Intuitive Windows Forms interface for easy use.
@@ -44,9 +59,4 @@ DiskCleaner is a user-friendly PowerShell GUI script designed to analyze and cle
 
 --
 
-## Usage
 
-1. Open PowerShell as Administrator.
-2. Run the script:
-   ```powershell
-   .\DiskCleaner.ps1
