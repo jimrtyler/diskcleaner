@@ -165,7 +165,25 @@ function Clear-DriveJunk() {
         "JunkNotRemoved" = [math]::Round(($junkNotRemoved/ 1GB),2)
 
     }
+
+# Output the table with color coding
+Write-Host "Result Summary" -ForegroundColor Cyan
+Write-Host "----------------"
+
+foreach ($key in $returnHashTable.Keys) {
+    $value = $returnHashTable[$key]
     
+    if ($key -eq "JunkFound") {
+        Write-Host "${key}:`t`t${value} GB" -ForegroundColor Yellow
+    } elseif ($key -eq "JunkRemoved") {
+        Write-Host "${key}:`t${value} GB" -ForegroundColor Green
+    } elseif ($key -eq "JunkNotRemoved") {
+        Write-Host "${key}:`t${value} GB" -ForegroundColor Red
+    } else {
+        Write-Host "${key}:`t${value} GB"
+    }
+}
+
     #Return that table as an object
     return new-object psobject -Property $returnHashTable
 
