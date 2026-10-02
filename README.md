@@ -16,11 +16,19 @@ DiskCleaner is a user-friendly PowerShell GUI script designed to analyze and cle
 
 ---
 
-## One Liner Usage
+## Download and Run
 1. Open PowerShell as Administrator
-2. Run this command:
+2. Download the script and read it before you run it:
    ```powershell
-   IEX(Invoke-WebRequest 'https://raw.githubusercontent.com/jimrtyler/diskcleaner/refs/heads/main/DiskCleanerStandalone.ps1'); Clear-DriveJunk -DriveLetter "C" -ActuallyDeleteFiles $true -LogFile ".\diskcleaner.log"
+   Invoke-WebRequest 'https://raw.githubusercontent.com/jimrtyler/diskcleaner/main/DiskCleanerStandalone.ps1' -OutFile .\DiskCleanerStandalone.ps1
+   Get-Content .\DiskCleanerStandalone.ps1
+   . .\DiskCleanerStandalone.ps1
+   ```
+3. See what it would delete first, then run it for real:
+   ```powershell
+   Clear-DriveJunk -DriveLetter "C" -LogFile ".\diskcleaner.log"
+   Clear-DriveJunk -DriveLetter "C" -ActuallyDeleteFiles $true -LogFile ".\diskcleaner.log"
+   ```
 
 ## Usage
 
